@@ -69,19 +69,80 @@
   </div>
 </div>
 
-<!-- Schedule info -->
-<div class="card">
+<!-- Schedule & Email Settings -->
+<div class="card" id="settingsCard">
   <div class="card-header">
-    <span class="card-title">⏰ 定时任务</span>
-    <span class="badge badge-green">{{ config.schedule.timezone }}</span>
+    <span class="card-title">⚙️ 设置</span>
+    <div>
+      <button class="btn btn-sm" id="editSettingsBtn" onclick="toggleSettingsEdit(true)">✏️ 编辑</button>
+      <button class="btn btn-sm btn-primary" id="saveSettingsBtn" onclick="saveSettings()" style="display:none;">💾 保存</button>
+      <button class="btn btn-sm" id="cancelSettingsBtn" onclick="toggleSettingsEdit(false)" style="display:none;">取消</button>
+    </div>
   </div>
-  <div style="font-size: 13px; color: var(--text-muted);">
-    每天 <strong style="color: var(--text);">{{ config.schedule.times | join(' / ') }}</strong>
-    自动运行，抓取过去 <strong style="color: var(--text);">{{ config.schedule.window_hours }}h</strong> 的内容
+
+  <!-- Display mode -->
+  <div id="settingsDisplay">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">⏰ 定时运行</div>
+        <div style="font-size: 14px; font-weight: 600;">{{ config.schedule.times | join(' / ') }}</div>
+        <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">
+          {{ config.schedule.timezone }} · 窗口 {{ config.schedule.window_hours }}h
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">📧 发送邮件至</div>
+        <div style="font-size: 13px;">
+          {% for addr in config.email.to_addrs %}
+            <div style="margin-bottom: 2px;">{{ addr }}</div>
+          {% endfor %}
+        </div>
+        <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">
+          发件人: {{ config.email.from_addr }}
+        </div>
+      </div>
+    </div>
   </div>
-  <div style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">
-    发送至: {{ config.email.to_addrs | join(', ') }}
-  </div>
+
+  <!-- Edit mode -->
+  <form id="settingsForm" style="display:none;" method="POST" action="/settings">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div>
+        <div class="form-group">
+          <label class="form-label">运行时间（每行一个，HH:MM 格式）</label>
+          <textarea name="times" class="form-input" rows="3" style="resize: vertical; font-family: monospace;">{% for t in config.schedule.times %}{{ t }}
+{% endfor %}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">时区</label>
+          <input type="text" name="timezone" class="form-input" value="{{ config.schedule.timezone }}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">抓取窗口（小时）</label>
+          <input type="number" name="window_hours" class="form-input" value="{{ config.schedule.window_hours }}" min="1" max="48" />
+        </div>
+      </div>
+      <div>
+        <div class="form-group">
+          <label class="form-label">收件人（每行一个邮箱地址）</label>
+          <textarea name="to_addrs" class="form-input" rows="3" style="resize: vertical;">{% for a in config.email.to_addrs %}{{ a }}
+{% endfor %}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">发件人地址</label>
+          <input type="email" name="from_addr" class="form-input" value="{{ config.email.from_addr }}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">SMTP 主机</label>
+          <input type="text" name="smtp_host" class="form-input" value="{{ config.email.smtp_host }}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">SMTP 端口</label>
+          <input type="number" name="smtp_port" class="form-input" value="{{ config.email.smtp_port }}" />
+        </div>
+      </div>
+    </div>
+  </form>
 </div>
 
 <!-- Run history -->
@@ -116,10 +177,21 @@
 {% endblock %}
 
 {% block scripts %}
-{% if status.running %}
 <script>
-  // Auto-refresh while running
+function toggleSettingsEdit(editing) {
+  document.getElementById('settingsDisplay').style.display = editing ? 'none' : 'block';
+  document.getElementById('settingsForm').style.display = editing ? 'block' : 'none';
+  document.getElementById('editSettingsBtn').style.display = editing ? 'none' : 'inline-flex';
+  document.getElementById('saveSettingsBtn').style.display = editing ? 'inline-flex' : 'none';
+  document.getElementById('cancelSettingsBtn').style.display = editing ? 'inline-flex' : 'none';
+}
+
+function saveSettings() {
+  document.getElementById('settingsForm').submit();
+}
+
+{% if status.running %}
   setTimeout(() => location.reload(), 5000);
-</script>
 {% endif %}
+</script>
 {% endblock %}

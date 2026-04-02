@@ -23,6 +23,7 @@ sources:
   - url: https://app-production-9ec8.up.railway.app/feeds/MP_WXS_3988614169.atom
     name: 葬AI
   x_rss:
+  # --- 原有 ---
   - url: https://xcancel.com/sama/rss
     name: '@sama (Sam Altman)'
   - url: https://xcancel.com/karpathy/rss
@@ -33,6 +34,51 @@ sources:
     name: '@demaborasade'
   - url: https://xcancel.com/alexalbert__/rss
     name: '@alexalbert__ (Alex Albert)'
+  # --- AI 公司领导层 ---
+  - url: https://xcancel.com/elonmusk/rss
+    name: '@elonmusk (Elon Musk · xAI/Grok)'
+  - url: https://xcancel.com/satyanadella/rss
+    name: '@satyanadella (Satya Nadella · Microsoft)'
+  - url: https://xcancel.com/demaborasadeshassabis/rss
+    name: '@demishassabis (Demis Hassabis · DeepMind)'
+  - url: https://xcancel.com/mustaborasafasuleyman/rss
+    name: '@mustafasuleyman (Mustafa Suleyman · Microsoft AI)'
+  - url: https://xcancel.com/JeffDean/rss
+    name: '@JeffDean (Jeff Dean · Google DeepMind)'
+  - url: https://xcancel.com/drfeifei/rss
+    name: '@drfeifei (Fei-Fei Li · Stanford/World Labs)'
+  # --- AI 研究者 ---
+  - url: https://xcancel.com/fchollet/rss
+    name: '@fchollet (Francois Chollet · Keras/ARC-AGI)'
+  - url: https://xcancel.com/hardmaru/rss
+    name: '@hardmaru (David Ha · AI 研究者)'
+  - url: https://xcancel.com/GaryMarcus/rss
+    name: '@GaryMarcus (Gary Marcus · AI 评论)'
+  - url: https://xcancel.com/jackclarkSF/rss
+    name: '@jackclarkSF (Jack Clark · Anthropic/Import AI)'
+  - url: https://xcancel.com/ESYudkowsky/rss
+    name: '@ESYudkowsky (Eliezer Yudkowsky · AI 安全)'
+  - url: https://xcancel.com/Miles_Brundage/rss
+    name: '@Miles_Brundage (Miles Brundage · AI 政策)'
+  # --- AI 新闻与评论 ---
+  - url: https://xcancel.com/AravSrinivas/rss
+    name: '@AravSrinivas (Aravind Srinivas · Perplexity CEO)'
+  - url: https://xcancel.com/emollick/rss
+    name: '@emollick (Ethan Mollick · Wharton AI 研究)'
+  - url: https://xcancel.com/svpino/rss
+    name: '@svpino (Santiago · ML 工程师)'
+  # --- 中国 AI 观察 ---
+  - url: https://xcancel.com/mattsheehan/rss
+    name: '@mattsheehan (Matt Sheehan · 中美AI分析)'
+  - url: https://xcancel.com/jeffjding/rss
+    name: '@jeffjding (Jeffrey Ding · ChinAI Newsletter)'
+  - url: https://xcancel.com/kaaborasaifulee/rss
+    name: '@kaifulee (李开复 · 创新工场)'
+  # --- AI 产品/创业 ---
+  - url: https://xcancel.com/bindureddy/rss
+    name: '@bindureddy (Bindu Reddy · Abacus.AI)'
+  - url: https://xcancel.com/swyx/rss
+    name: '@swyx (Shawn Wang · AI 工程/Latent Space)'
   official_blogs:
   - url: https://openai.com/blog/rss.xml
     name: OpenAI Blog
@@ -86,6 +132,7 @@ email:
   from_addr: openclaw0304@gmail.com
   to_addrs:
   - openclaw0304@gmail.com
+  - bmwpowerup@gmail.com
 schedule:
   times:
   - '10:00'

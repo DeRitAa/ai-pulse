@@ -70,6 +70,47 @@ def index():
     return render_template("index.html", config=config, runs=runs, status=_run_status)
 
 
+@app.route("/settings", methods=["POST"])
+def update_settings():
+    config = load_config()
+
+    # Parse schedule times (one per line)
+    times_raw = request.form.get("times", "").strip()
+    times = [t.strip() for t in times_raw.splitlines() if t.strip()]
+    if times:
+        config["schedule"]["times"] = times
+
+    timezone = request.form.get("timezone", "").strip()
+    if timezone:
+        config["schedule"]["timezone"] = timezone
+
+    window_hours = request.form.get("window_hours")
+    if window_hours:
+        config["schedule"]["window_hours"] = int(window_hours)
+
+    # Parse email recipients (one per line)
+    to_raw = request.form.get("to_addrs", "").strip()
+    to_addrs = [a.strip() for a in to_raw.splitlines() if a.strip()]
+    if to_addrs:
+        config["email"]["to_addrs"] = to_addrs
+
+    from_addr = request.form.get("from_addr", "").strip()
+    if from_addr:
+        config["email"]["from_addr"] = from_addr
+
+    smtp_host = request.form.get("smtp_host", "").strip()
+    if smtp_host:
+        config["email"]["smtp_host"] = smtp_host
+
+    smtp_port = request.form.get("smtp_port")
+    if smtp_port:
+        config["email"]["smtp_port"] = int(smtp_port)
+
+    save_config(config)
+    flash("设置已保存", "success")
+    return redirect(url_for("index"))
+
+
 @app.route("/sources")
 def sources():
     config = load_config()
