@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% set active_page = "index" %}
+
+{% block title %}看板 — AI News Digest{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+  <h1 class="page-title" style="margin-bottom: 0;">📊 看板</h1>
+  <div style="display: flex; gap: 8px;">
+    <form method="POST" action="/run" style="display:inline;">
+      <input type="hidden" name="dry_run" value="1" />
+      <button type="submit" class="btn" {% if status.running %}disabled{% endif %}>
+        🏃 Dry Run
+      </button>
+    </form>
+    <form method="POST" action="/run" style="display:inline;">
+      <input type="hidden" name="dry_run" value="0" />
+      <button type="submit" class="btn btn-primary" {% if status.running %}disabled{% endif %}>
+        🚀 立即运行并发送
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Status -->
+{% if status.running %}
+<div class="card" style="border-left: 3px solid var(--accent);">
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <span class="badge badge-blue">运行中</span>
+    <span style="font-size: 13px;">{{ status.last_message }}</span>
+  </div>
+</div>
+{% elif status.last_message %}
+<div class="card" style="border-left: 3px solid var(--green);">
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <span style="font-size: 13px;">{{ status.last_message }}</span>
+    {% if status.last_run %}
+    <span style="font-size: 11px; color: var(--text-dim);">{{ status.last_run }}</span>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Stats -->
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+  <div class="card" style="text-align: center;">
+    <div style="font-size: 24px; font-weight: 700; color: var(--accent);">
+      {{ config.sources.wechat_rss | length }}
+    </div>
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">微信公众号</div>
+  </div>
+  <div class="card" style="text-align: center;">
+    <div style="font-size: 24px; font-weight: 700; color: var(--purple);">
+      {{ config.sources.x_rss | length }}
+    </div>
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">X / Twitter</div>
+  </div>
+  <div class="card" style="text-align: center;">
+    <div style="font-size: 24px; font-weight: 700; color: var(--green);">
+      {{ config.sources.official_blogs | length }}
+    </div>
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">官方博客</div>
+  </div>
+  <div class="card" style="text-align: center;">
+    <div style="font-size: 24px; font-weight: 700; color: var(--orange);">
+      {{ runs | length }}
+    </div>
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">历史运行</div>
+  </div>
+</div>
+
+<!-- Schedule info -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">⏰ 定时任务</span>
+    <span class="badge badge-green">{{ config.schedule.timezone }}</span>
+  </div>
+  <div style="font-size: 13px; color: var(--text-muted);">
+    每天 <strong style="color: var(--text);">{{ config.schedule.times | join(' / ') }}</strong>
+    自动运行，抓取过去 <strong style="color: var(--text);">{{ config.schedule.window_hours }}h</strong> 的内容
+  </div>
+  <div style="font-size: 12px; color: var(--text-dim); margin-top: 6px;">
+    发送至: {{ config.email.to_addrs | join(', ') }}
+  </div>
+</div>
+
+<!-- Run history -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">📁 运行历史</span>
+  </div>
+  {% if runs %}
+    {% for run in runs %}
+    <div class="run-item">
+      <div class="run-info">
+        <div class="run-name">{{ run.name }}</div>
+        <div class="run-meta">
+          {% if run.article_count is defined %}{{ run.article_count }} 篇文章{% endif %}
+          {% if run.special_news_count is defined %} · {{ run.special_news_count }} 重要动态{% endif %}
+          {% if run.recommended_count is defined %} · {{ run.recommended_count }} 推荐阅读{% endif %}
+        </div>
+      </div>
+      <div class="run-actions">
+        {% if run.has_email %}
+        <a href="/preview/{{ run.name }}" target="_blank" class="btn btn-sm">👁 预览邮件</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div style="font-size: 13px; color: var(--text-dim); padding: 12px 0;">
+      还没有运行记录。点击上方按钮开始第一次运行。
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if status.running %}
+<script>
+  // Auto-refresh while running
+  setTimeout(() => location.reload(), 5000);
+</script>
+{% endif %}
+{% endblock %}

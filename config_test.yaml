@@ -1,0 +1,88 @@
+dimensions:
+- border: '#7ee787'
+  color: '#7ee787'
+  key: reasoning
+  label: 🧠 推理
+- border: '#79c0ff'
+  color: '#79c0ff'
+  key: multimodal
+  label: 👁️ 多模态
+- border: '#f78166'
+  color: '#f78166'
+  key: code
+  label: 💻 代码
+- border: '#d2a8ff'
+  color: '#d2a8ff'
+  key: long_context
+  label: 📄 长上下文
+- border: '#ffa657'
+  color: '#ffa657'
+  key: speed_cost
+  label: ⚡ 速度/成本
+email:
+  from_addr: openclaw0304@gmail.com
+  smtp_host: smtp.gmail.com
+  smtp_port: 587
+  to_addrs:
+  - openclaw0304@gmail.com
+schedule:
+  times:
+  - '10:00'
+  - '22:00'
+  timezone: Asia/Shanghai
+  window_hours: 72
+sources:
+  official_blogs:
+  - name: OpenAI Blog
+    url: https://openai.com/blog/rss.xml
+    vendor: OpenAI
+  - name: Anthropic News
+    url: https://www.anthropic.com/news/rss
+    vendor: Anthropic
+  - name: Google AI Blog
+    url: https://blog.google/technology/ai/rss/
+    vendor: Google
+  - name: Meta AI Blog
+    url: https://ai.meta.com/blog/rss/
+    vendor: Meta
+  wechat_rss:
+  - name: 数字生命卡兹克
+    url: https://app-production-9ec8.up.railway.app/feeds/MP_WXS_3223096120.atom
+  - name: 葬AI
+    url: https://app-production-9ec8.up.railway.app/feeds/MP_WXS_3988614169.atom
+  - name: Founder Park
+    url: https://app-production-9ec8.up.railway.app/feeds/MP_WXS_3895742803.atom
+  - name: elsewhere别处发生
+    url: https://app-production-9ec8.up.railway.app/feeds/MP_WXS_3635075805.atom
+  - name: 42章经
+    url: https://app-production-9ec8.up.railway.app/feeds/MP_WXS_3220199623.atom
+  - name: 机器之心
+    url: https://app-production-9ec8.up.railway.app/feeds/MP_WXS_3073282833.atom
+  - name: 海外独角兽
+    url: https://app-production-9ec8.up.railway.app/feeds/MP_WXS_3869640945.atom
+  - name: AI大模型应用实践
+    url: https://app-production-9ec8.up.railway.app/feeds/MP_WXS_3957458995.atom
+  x_rss:
+  - name: '@sama (Sam Altman)'
+    url: https://xcancel.com/sama/rss
+  - name: '@karpathy (Andrej Karpathy)'
+    url: https://xcancel.com/karpathy/rss
+  - name: '@ylecun (Yann LeCun)'
+    url: https://xcancel.com/ylecun/rss
+  - name: '@demaborasade'
+    url: https://xcancel.com/demaborasade/rss
+  - name: '@alexalbert__ (Alex Albert)'
+    url: https://xcancel.com/alexalbert__/rss
+vendors:
+  china:
+  - 阿里
+  - 字节
+  - MiniMax
+  - Kimi
+  - 百度
+  international:
+  - OpenAI
+  - Anthropic
+  - Google
+  - Meta
+  - xAI

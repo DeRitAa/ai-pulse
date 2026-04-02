@@ -7,11 +7,15 @@ import sys
 from datetime import datetime, timezone, timedelta
 
 import yaml
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from src.fetcher import fetch_all_feeds
 from src.analyzer import analyze_articles, merge_scores
 from src.renderer import render_email
 from src.emailer import send_email, build_subject
+from src.openrouter import fetch_openrouter_models, build_vendor_dashboard
 
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
@@ -46,7 +50,12 @@ def save_run_data(run_dir: str, raw_articles: list, analysis_result, html: str) 
         json.dump(serializable, f, ensure_ascii=False, indent=2)
 
     with open(os.path.join(run_dir, "scores.json"), "w", encoding="utf-8") as f:
-        json.dump({"scores": analysis_result.scores, "openness": analysis_result.openness, "special_news": analysis_result.special_news}, f, ensure_ascii=False, indent=2)
+        json.dump({
+            "scores": analysis_result.scores,
+            "openness": analysis_result.openness,
+            "special_news": analysis_result.special_news,
+            "recommended_reads": analysis_result.recommended_reads,
+        }, f, ensure_ascii=False, indent=2)
 
     with open(os.path.join(run_dir, "email.html"), "w", encoding="utf-8") as f:
         f.write(html)
@@ -71,38 +80,36 @@ def run(dry_run: bool = False) -> None:
         print("⚠️  No articles found. Skipping this run.")
         return
 
-    # 2. Analyze with Claude
-    print("🤖 Analyzing with Claude API...")
+    # 2. Analyze with LLM
+    print("🤖 Analyzing with MiniMax API...")
     result = analyze_articles(articles)
-    print(f"   → {len(result.scores)} vendors scored, {len(result.special_news)} special news")
+    print(f"   → {len(result.special_news)} special news, {len(result.recommended_reads)} recommended reads")
 
-    # 3. Merge with previous scores
-    previous_scores = load_latest_scores()
-    merged_scores = merge_scores(previous_scores, result.scores)
+    # 3. Fetch OpenRouter model data
+    print("📊 Fetching OpenRouter model data...")
+    or_models = fetch_openrouter_models()
+    vendor_dashboard = build_vendor_dashboard(or_models)
+    print(f"   → {len(or_models)} models from {len(vendor_dashboard)} vendors")
 
     # 4. Render email
     now = datetime.now(timezone(timedelta(hours=8)))
     report_time = now.strftime("%Y-%m-%d %H:%M")
-    dimensions = config["dimensions"]
+    dimensions = config.get("dimensions", [])
 
     html = render_email(
-        scores=merged_scores,
+        scores=result.scores,
         openness=result.openness,
         special_news=result.special_news,
         dimensions=dimensions,
         total_articles=len(articles),
         report_time=report_time,
+        recommended_reads=result.recommended_reads,
+        vendor_dashboard=vendor_dashboard,
     )
 
     # 5. Archive
     run_dir = os.path.join(DATA_DIR, now.strftime("%Y-%m-%d-%H"))
     save_run_data(run_dir, articles, result, html)
-
-    # Save cumulative scores
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with open(LATEST_SCORES_PATH, "w", encoding="utf-8") as f:
-        json.dump(merged_scores, f, ensure_ascii=False, indent=2)
-
     print(f"💾 Data archived to {run_dir}/")
 
     # 6. Send email

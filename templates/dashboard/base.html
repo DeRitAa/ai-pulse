@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}AI News Digest{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --border-light: #21262d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --text-dim: #484f58;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --orange: #ffa657;
+      --purple: #d2a8ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Layout */
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 20px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 0 20px 20px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      border-bottom: 1px solid var(--border-light);
+      margin-bottom: 12px;
+    }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .sidebar-nav a:hover, .sidebar-nav a.active {
+      color: var(--text);
+      background: var(--border-light);
+    }
+    .sidebar-nav a.active { border-right: 2px solid var(--accent); }
+    .main {
+      margin-left: 220px;
+      flex: 1;
+      padding: 28px 32px;
+      max-width: 960px;
+    }
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    /* Flash messages */
+    .flash {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      border: 1px solid;
+    }
+    .flash.success { background: #3fb95015; border-color: #3fb95040; color: var(--green); }
+    .flash.error { background: #f8514915; border-color: #f8514940; color: var(--red); }
+    .flash.info { background: #58a6ff15; border-color: #58a6ff40; color: var(--accent); }
+    .flash.warning { background: #ffa65715; border-color: #ffa65740; color: var(--orange); }
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: var(--border-light); border-color: var(--text-muted); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-danger { color: var(--red); }
+    .btn-danger:hover { background: #f8514915; border-color: var(--red); }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    /* Forms */
+    .form-group { margin-bottom: 12px; }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-row { display: flex; gap: 10px; }
+    .form-row > * { flex: 1; }
+    /* Table */
+    .source-table { width: 100%; border-collapse: collapse; }
+    .source-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .source-table td {
+      font-size: 13px;
+      padding: 8px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: middle;
+    }
+    .source-table tr:last-child td { border-bottom: none; }
+    .source-url {
+      font-size: 11px;
+      color: var(--text-dim);
+      word-break: break-all;
+    }
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    .badge-green { background: #3fb95020; color: var(--green); }
+    .badge-blue { background: #58a6ff20; color: var(--accent); }
+    .badge-orange { background: #ffa65720; color: var(--orange); }
+    /* Run history */
+    .run-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .run-item:last-child { border-bottom: none; }
+    .run-info { flex: 1; }
+    .run-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .run-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .run-actions { display: flex; gap: 6px; }
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      width: 440px;
+      max-width: 90vw;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">📡 AI News Digest</div>
+      <nav class="sidebar-nav">
+        <a href="/" class="{% if active_page == 'index' %}active{% endif %}">📊 看板</a>
+        <a href="/sources" class="{% if active_page == 'sources' %}active{% endif %}">📋 RSS 源管理</a>
+      </nav>
+    </div>
+    <div class="main">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,11 +1,71 @@
 """RSS feed fetcher with time filtering and deduplication."""
 
+import re
 import time
 from datetime import datetime, timezone, timedelta
 from calendar import timegm
 from difflib import SequenceMatcher
+from html.parser import HTMLParser
 
 import feedparser
+
+
+class _WeChatContentExtractor(HTMLParser):
+    """Extract plain text from WeChat's js_content / rich_media_content div."""
+
+    def __init__(self):
+        super().__init__()
+        self._in_content = False
+        self._depth = 0
+        self.texts: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        attr_dict = dict(attrs)
+        if attr_dict.get("id") in ("js_content", "rich_media_content"):
+            self._in_content = True
+            self._depth = 0
+        elif self._in_content:
+            self._depth += 1
+
+    def handle_endtag(self, tag):
+        if self._in_content:
+            if self._depth == 0:
+                self._in_content = False
+            else:
+                self._depth -= 1
+
+    def handle_data(self, data):
+        if self._in_content and data.strip():
+            self.texts.append(data.strip())
+
+
+def _extract_summary(entry) -> str:
+    """Return the best available plain-text summary for an entry.
+
+    WeWeRSS stores full 3MB WeChat page HTML in <content>. feedparser's
+    default sanitizer reduces it to garbage like '&&&&&&&&&&'.
+    We parse the raw HTML to extract real article text.
+    """
+    # 1. Try unsanitized content (WeWeRSS WeChat feeds)
+    if hasattr(entry, "content") and entry.content:
+        raw_html = entry.content[0].get("value", "")
+        if raw_html and len(raw_html) > 200:
+            extractor = _WeChatContentExtractor()
+            try:
+                extractor.feed(raw_html)
+            except Exception:
+                pass
+            text = " ".join(extractor.texts)
+            if len(text) > 50:
+                return text[:2000]  # cap for LLM context
+
+    # 2. Fall back to entry.summary if it looks non-garbage
+    summary = entry.get("summary", "")
+    if summary and not all(c in "&; \n\t" for c in summary):
+        return summary[:2000]
+
+    # 3. Fall back to title
+    return ""
 
 
 def fetch_all_feeds(sources: list[dict], window_hours: int = 12) -> list[dict]:
@@ -23,29 +83,31 @@ def fetch_all_feeds(sources: list[dict], window_hours: int = 12) -> list[dict]:
 def _fetch_single_feed(url: str, source_name: str) -> list[dict]:
     """Parse one RSS feed and normalize entries to a common dict format."""
     try:
-        feed = feedparser.parse(url)
+        feed = feedparser.parse(url, sanitize_html=False)
     except Exception:
         return []
 
     entries = []
     for entry in feed.entries:
-        published_parsed = getattr(entry, "published_parsed", None)
-        if published_parsed is None:
+        # WeWeRSS Atom feeds use updated_parsed; standard RSS uses published_parsed
+        parsed_time = getattr(entry, "published_parsed", None) or getattr(entry, "updated_parsed", None)
+        if parsed_time is None:
             continue
         entries.append({
             "title": entry.title,
             "link": entry.link,
-            "published_parsed": published_parsed,
-            "published_ts": timegm(published_parsed),
-            "summary": entry.get("summary", ""),
+            "published_parsed": parsed_time,
+            "published_ts": timegm(parsed_time),
+            "summary": _extract_summary(entry),
             "source_name": source_name,
         })
     return entries
 
 
 def filter_by_time(entries: list[dict], window_hours: int = 12) -> list[dict]:
-    """Keep only entries published within the last `window_hours` hours."""
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=window_hours)
+    """Keep only entries published within the last `window_hours` hours.
+    Adds a 30-minute grace buffer to avoid losing articles on the boundary."""
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=window_hours, minutes=30)
     cutoff_ts = cutoff.timestamp()
 
     result = []

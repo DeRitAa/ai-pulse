@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% set active_page = "sources" %}
+
+{% block title %}RSS 源管理 — AI News Digest{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+  <h1 class="page-title" style="margin-bottom: 0;">📋 RSS 源管理</h1>
+  <form method="POST" action="/sync/wewerss">
+    <button type="submit" class="btn btn-primary">🔄 从 WeWeRSS 同步</button>
+  </form>
+</div>
+
+{% set groups = [
+  ("wechat_rss", "微信公众号", "WeWeRSS Atom feed URL", "📱"),
+  ("x_rss", "X / Twitter", "xcancel.com 或 RSSHub URL", "🐦"),
+  ("official_blogs", "官方博客", "RSS/Atom feed URL", "🏢")
+] %}
+
+{% for group_key, group_label, url_hint, emoji in groups %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">{{ emoji }} {{ group_label }}</span>
+    <button class="btn btn-sm btn-primary" onclick="openAddModal('{{ group_key }}', '{{ group_label }}', '{{ url_hint }}')">
+      + 添加
+    </button>
+  </div>
+
+  {% set sources = config.sources.get(group_key, []) %}
+  {% if sources %}
+  <table class="source-table">
+    <thead>
+      <tr>
+        <th style="width: 30%;">名称</th>
+        <th>URL</th>
+        {% if group_key == 'official_blogs' %}<th style="width: 12%;">厂商</th>{% endif %}
+        <th style="width: 100px; text-align: right;">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sources %}
+      <tr>
+        <td>
+          <span style="font-weight: 500;">{{ s.name }}</span>
+        </td>
+        <td>
+          <span class="source-url">{{ s.url }}</span>
+        </td>
+        {% if group_key == 'official_blogs' %}
+        <td><span class="badge badge-blue">{{ s.get('vendor', '-') }}</span></td>
+        {% endif %}
+        <td style="text-align: right;">
+          <button class="btn btn-sm"
+            onclick="openEditModal('{{ group_key }}', {{ loop.index0 }}, '{{ s.name }}', '{{ s.url }}', '{{ s.get('vendor', '') }}')">
+            ✏️
+          </button>
+          <form method="POST" action="/sources/delete" style="display:inline;"
+            onsubmit="return confirm('确定删除 {{ s.name }}？')">
+            <input type="hidden" name="group" value="{{ group_key }}" />
+            <input type="hidden" name="index" value="{{ loop.index0 }}" />
+            <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div style="font-size: 13px; color: var(--text-dim); padding: 8px 0;">
+      暂无源。点击「添加」开始订阅。
+    </div>
+  {% endif %}
+</div>
+{% endfor %}
+
+<!-- Add Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-title" id="addModalTitle">添加 RSS 源</div>
+    <form method="POST" action="/sources/add">
+      <input type="hidden" name="group" id="addGroup" />
+      <div class="form-group">
+        <label class="form-label">名称</label>
+        <input type="text" name="name" class="form-input" placeholder="例：量子位" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Feed URL</label>
+        <input type="url" name="url" class="form-input" id="addUrlInput" placeholder="" required />
+      </div>
+      <div class="form-group" id="addVendorGroup" style="display: none;">
+        <label class="form-label">厂商名（可选）</label>
+        <input type="text" name="vendor" class="form-input" placeholder="例：OpenAI" />
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+        <button type="button" class="btn" onclick="closeModal('addModal')">取消</button>
+        <button type="submit" class="btn btn-primary">添加</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title">编辑 RSS 源</div>
+    <form method="POST" action="/sources/edit">
+      <input type="hidden" name="group" id="editGroup" />
+      <input type="hidden" name="index" id="editIndex" />
+      <div class="form-group">
+        <label class="form-label">名称</label>
+        <input type="text" name="name" id="editName" class="form-input" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Feed URL</label>
+        <input type="url" name="url" id="editUrl" class="form-input" required />
+      </div>
+      <div class="form-group" id="editVendorGroup" style="display: none;">
+        <label class="form-label">厂商名</label>
+        <input type="text" name="vendor" id="editVendor" class="form-input" />
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+        <button type="button" class="btn" onclick="closeModal('editModal')">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openAddModal(group, label, hint) {
+  document.getElementById('addGroup').value = group;
+  document.getElementById('addModalTitle').textContent = '添加 ' + label;
+  document.getElementById('addUrlInput').placeholder = hint;
+  document.getElementById('addVendorGroup').style.display =
+    group === 'official_blogs' ? 'block' : 'none';
+  document.getElementById('addModal').classList.add('active');
+}
+
+function openEditModal(group, idx, name, url, vendor) {
+  document.getElementById('editGroup').value = group;
+  document.getElementById('editIndex').value = idx;
+  document.getElementById('editName').value = name;
+  document.getElementById('editUrl').value = url;
+  document.getElementById('editVendor').value = vendor;
+  document.getElementById('editVendorGroup').style.display =
+    group === 'official_blogs' ? 'block' : 'none';
+  document.getElementById('editModal').classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => {
+    if (e.target === el) el.classList.remove('active');
+  });
+});
+
+// Close modal on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(el =>
+      el.classList.remove('active')
+    );
+  }
+});
+</script>
+{% endblock %}

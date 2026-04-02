@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI 动态周报</title>
+  <title>AI 动态日报</title>
   <style>
     body {
       margin: 0;
@@ -11,186 +11,166 @@
       background-color: #0d1117;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
       color: #c9d1d9;
+      -webkit-font-smoothing: antialiased;
     }
     .wrapper {
-      max-width: 680px;
+      max-width: 640px;
       margin: 0 auto;
-      padding: 24px 16px;
+      padding: 20px 16px;
     }
     /* Header */
     .header {
-      text-align: center;
-      padding: 32px 24px;
-      background: #161b22;
+      padding: 28px 24px;
+      background: linear-gradient(135deg, #161b22 0%, #1c2333 100%);
       border-radius: 12px;
       border: 1px solid #30363d;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+      text-align: center;
     }
     .header h1 {
-      margin: 0 0 8px 0;
-      font-size: 22px;
+      margin: 0 0 6px 0;
+      font-size: 20px;
       font-weight: 700;
       color: #e6edf3;
+      letter-spacing: -0.02em;
     }
     .header .meta {
-      font-size: 13px;
+      font-size: 12px;
       color: #8b949e;
     }
-    .header .meta span {
-      margin: 0 6px;
-    }
-    /* Section title */
+    .header .meta span { margin: 0 4px; }
+    /* Section */
+    .section { margin-bottom: 20px; }
     .section-title {
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 600;
       color: #8b949e;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 0 0 12px 0;
-      padding-bottom: 8px;
+      margin: 0 0 10px 0;
+      padding-bottom: 6px;
       border-bottom: 1px solid #21262d;
     }
-    /* Grid layout for modules */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    /* Individual module card */
-    .module {
+    /* News cards */
+    .card {
       background: #161b22;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid #30363d;
-      padding: 14px;
-    }
-    .module-title {
-      font-size: 13px;
-      font-weight: 600;
-      margin: 0 0 12px 0;
-      color: #e6edf3;
-      padding-bottom: 8px;
-      border-bottom-width: 2px;
-      border-bottom-style: solid;
-    }
-    /* Vendor row in dimension modules */
-    .vendor-row {
-      margin-bottom: 10px;
-    }
-    .vendor-row:last-child {
-      margin-bottom: 0;
-    }
-    .vendor-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 4px;
-    }
-    .vendor-name {
-      font-size: 12px;
-      color: #c9d1d9;
-      font-weight: 500;
-    }
-    .vendor-model {
-      font-size: 10px;
-      color: #8b949e;
-    }
-    .vendor-score {
-      font-size: 12px;
-      font-weight: 700;
-      color: #e6edf3;
-    }
-    /* Progress bar */
-    .bar-bg {
-      background: #21262d;
-      border-radius: 4px;
-      height: 6px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%;
-      border-radius: 4px;
-    }
-    /* Openness tags */
-    .openness-vendor {
-      margin-bottom: 10px;
-    }
-    .openness-vendor:last-child {
-      margin-bottom: 0;
-    }
-    .openness-vendor-name {
-      font-size: 12px;
-      font-weight: 600;
-      color: #e6edf3;
-      margin-bottom: 6px;
-    }
-    .openness-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-    .openness-tag {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: #21262d;
-      color: #c9d1d9;
-      white-space: nowrap;
-    }
-    /* Special news section */
-    .news-section {
-      margin-bottom: 24px;
-    }
-    .news-card {
-      background: #161b22;
-      border-radius: 10px;
       border-left-width: 3px;
       border-left-style: solid;
-      border-top: 1px solid #30363d;
-      border-right: 1px solid #30363d;
-      border-bottom: 1px solid #30363d;
-      padding: 14px 16px;
-      margin-bottom: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
     }
-    .news-card:last-child {
-      margin-bottom: 0;
-    }
-    .news-type-tag {
+    .card:last-child { margin-bottom: 0; }
+    .card-tag {
       display: inline-block;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 4px;
-      margin-bottom: 6px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-bottom: 4px;
     }
-    .news-title {
+    .card-title {
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 600;
       color: #e6edf3;
-      margin: 0 0 6px 0;
+      margin: 0 0 4px 0;
+      line-height: 1.4;
     }
-    .news-summary {
-      font-size: 13px;
+    .card-summary {
+      font-size: 12px;
       color: #8b949e;
       line-height: 1.5;
-      margin: 0 0 8px 0;
+      margin: 0 0 6px 0;
     }
-    .news-source-link {
-      font-size: 12px;
+    .card-link {
+      font-size: 11px;
       color: #58a6ff;
       text-decoration: none;
     }
-    .news-source-link:hover {
-      text-decoration: underline;
+    .card-link:hover { text-decoration: underline; }
+    /* Model dashboard */
+    .vendor-group {
+      background: #161b22;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+    .vendor-group:last-child { margin-bottom: 0; }
+    .vendor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #21262d;
+    }
+    .vendor-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #e6edf3;
+    }
+    .vendor-badge {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: #21262d;
+      color: #8b949e;
+    }
+    .model-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 12px;
+    }
+    .model-row + .model-row {
+      border-top: 1px solid #21262d;
+    }
+    .model-name {
+      color: #c9d1d9;
+      font-weight: 500;
+      flex: 1;
+    }
+    .model-stat {
+      color: #8b949e;
+      font-size: 11px;
+      text-align: right;
+      margin-left: 8px;
+      white-space: nowrap;
+    }
+    .model-stat.ctx { color: #d2a8ff; }
+    .model-stat.price { color: #7ee787; }
+    .model-stat.vision { color: #ffa657; }
+    /* Openness */
+    .openness-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 0;
+      font-size: 12px;
+    }
+    .openness-row + .openness-row {
+      border-top: 1px solid #21262d;
+    }
+    .openness-vendor { color: #e6edf3; font-weight: 500; flex: 1; }
+    .openness-tag {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: #21262d;
+      color: #c9d1d9;
     }
     /* Footer */
     .footer {
       text-align: center;
-      font-size: 11px;
+      font-size: 10px;
       color: #484f58;
-      padding-top: 16px;
+      padding-top: 12px;
       border-top: 1px solid #21262d;
     }
+    .footer a { color: #484f58; text-decoration: none; }
   </style>
 </head>
 <body>
@@ -198,7 +178,7 @@
 
     <!-- Header -->
     <div class="header">
-      <h1>🤖 AI 动态周报</h1>
+      <h1>AI 动态日报</h1>
       <div class="meta">
         <span>{{ report_time }}</span>
         &middot;
@@ -206,91 +186,94 @@
       </div>
     </div>
 
-    <!-- Capability Dimension Modules Grid -->
-    {% if dimensions %}
-    <p class="section-title">能力评分</p>
-    <div class="grid">
-      {% for dim in dimensions %}
-      <div class="module">
-        <div class="module-title" style="border-bottom-color: {{ dim.border }}; color: {{ dim.color }};">
-          {{ dim.label }}
-        </div>
-        {% set vendors = scores_by_dim[dim.key] %}
-        {% if vendors %}
-          {% for vendor_name, model_name, score in vendors %}
-          <div class="vendor-row">
-            <div class="vendor-header">
-              <div>
-                <span class="vendor-name">{{ vendor_name }}</span>
-                {% if model_name %}
-                <br /><span class="vendor-model">{{ model_name }}</span>
-                {% endif %}
-              </div>
-              <span class="vendor-score">{{ score }}</span>
-            </div>
-            <div class="bar-bg">
-              <div class="bar-fill" style="width: {{ score }}%; background-color: {{ dim.color }};"></div>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div style="font-size: 12px; color: #484f58;">暂无数据</div>
-        {% endif %}
-      </div>
-      {% endfor %}
-
-      <!-- Openness Module -->
-      <div class="module">
-        <div class="module-title" style="border-bottom-color: #58a6ff; color: #58a6ff;">
-          🔓 开放程度
-        </div>
-        {% if openness %}
-          {% for vendor_name, attrs in openness.items() %}
-          <div class="openness-vendor">
-            <div class="openness-vendor-name">{{ vendor_name }}</div>
-            <div class="openness-tags">
-              {% set os_map = {"open": "🟢 完全开源", "partial": "🟡 部分开源", "closed": "🔴 不开源"} %}
-              {% set api_map = {"open": "🟢 全量开放", "limited": "🟡 限速/邀请制", "closed": "🔴 未开放"} %}
-              {% set pricing_map = {"transparent": "🟢 透明公开", "contact": "🟡 需联系销售", "unknown": "🔴 未知"} %}
-              <span class="openness-tag">{{ os_map.get(attrs.open_source, attrs.open_source) }}</span>
-              <span class="openness-tag">{{ api_map.get(attrs.api, attrs.api) }}</span>
-              <span class="openness-tag">{{ pricing_map.get(attrs.pricing, attrs.pricing) }}</span>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div style="font-size: 12px; color: #484f58;">暂无数据</div>
-        {% endif %}
-      </div>
-
-    </div>
-    {% endif %}
-
-    <!-- Special News Section -->
+    <!-- 1. Special News -->
     {% if special_news %}
-    <div class="news-section">
+    <div class="section">
       <p class="section-title">重要动态</p>
       {% for news in special_news %}
         {% set ntype = news_types.get(news.type, {"emoji": "📰", "label": news.type, "color": "#8b949e"}) %}
-        <div class="news-card" style="border-left-color: {{ ntype.color }};">
+        <div class="card" style="border-left-color: {{ ntype.color }};">
           <div>
-            <span class="news-type-tag" style="background-color: {{ ntype.color }}20; color: {{ ntype.color }};">
+            <span class="card-tag" style="background-color: {{ ntype.color }}18; color: {{ ntype.color }};">
               {{ ntype.emoji }} {{ ntype.label }}
             </span>
           </div>
-          <div class="news-title">{{ news.title }}</div>
-          <p class="news-summary">{{ news.summary }}</p>
-          <a class="news-source-link" href="{{ news.url }}" target="_blank">
-            📎 {{ news.source }} &rarr; {{ news.url }}
-          </a>
+          <div class="card-title">{{ news.title }}</div>
+          <p class="card-summary">{{ news.summary }}</p>
+          <a class="card-link" href="{{ news.url }}" target="_blank">{{ news.source }} →</a>
         </div>
       {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 2. Recommended Reads -->
+    {% if recommended_reads %}
+    <div class="section">
+      <p class="section-title">📚 推荐阅读</p>
+      {% for read in recommended_reads %}
+        <div class="card" style="border-left-color: #3fb950;">
+          <div>
+            <span class="card-tag" style="background-color: #3fb95018; color: #3fb950;">
+              {{ read.tag | default('推荐') }}
+            </span>
+          </div>
+          <div class="card-title">{{ read.title }}</div>
+          <p class="card-summary">{{ read.summary }}</p>
+          <a class="card-link" href="{{ read.url }}" target="_blank">{{ read.source }} → 阅读原文</a>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 3. Model Dashboard (OpenRouter data) -->
+    {% if vendor_dashboard %}
+    <div class="section">
+      <p class="section-title">模型看板 <span style="font-size: 10px; font-weight: 400; text-transform: none; letter-spacing: 0;">via OpenRouter</span></p>
+      {% for vendor, models in vendor_dashboard.items() %}
+      <div class="vendor-group">
+        <div class="vendor-header">
+          <span class="vendor-name">{{ vendor }}</span>
+          <span class="vendor-badge">{{ models | length }} 模型</span>
+        </div>
+        {% for m in models %}
+        <div class="model-row">
+          <span class="model-name">
+            {{ m.name }}
+            {% if m.has_vision %}👁{% endif %}
+            {% if m.has_audio %}🎙{% endif %}
+          </span>
+          <span class="model-stat ctx">{{ m.context_display }}</span>
+          <span class="model-stat price">{{ m.price_display }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 4. Openness (from LLM analysis) -->
+    {% if openness %}
+    <div class="section">
+      <p class="section-title">🔓 开放程度</p>
+      <div class="vendor-group">
+        {% set os_map = {"open": "🟢 开源", "partial": "🟡 部分", "closed": "🔴 闭源"} %}
+        {% set api_map = {"open": "🟢 全量", "limited": "🟡 限速", "closed": "🔴 未开放"} %}
+        {% set pricing_map = {"transparent": "🟢 透明", "contact": "🟡 询价", "unknown": "🔴 未知"} %}
+        {% for vendor_name, attrs in openness.items() %}
+        <div class="openness-row">
+          <span class="openness-vendor">{{ vendor_name }}</span>
+          <span class="openness-tag">{{ os_map.get(attrs.open_source, attrs.open_source) }}</span>
+          <span class="openness-tag">{{ api_map.get(attrs.api, attrs.api) }}</span>
+          <span class="openness-tag">{{ pricing_map.get(attrs.pricing, attrs.pricing) }}</span>
+        </div>
+        {% endfor %}
+      </div>
     </div>
     {% endif %}
 
     <!-- Footer -->
     <div class="footer">
-      由 Claude 自动生成 &middot; {{ report_time }}
+      自动生成 &middot; {{ report_time }} &middot; <a href="https://openrouter.ai/rankings" target="_blank">OpenRouter Rankings</a>
     </div>
 
   </div>

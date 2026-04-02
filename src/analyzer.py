@@ -1,11 +1,11 @@
-"""Claude API analyzer for scoring AI vendors and identifying special news."""
+"""LLM analyzer for scoring AI vendors and identifying special news."""
 
 import json
 import os
 import re
 from dataclasses import dataclass, field
 
-import anthropic
+from openai import OpenAI
 
 
 @dataclass
@@ -13,6 +13,7 @@ class AnalysisResult:
     scores: dict = field(default_factory=dict)
     openness: dict = field(default_factory=dict)
     special_news: list = field(default_factory=list)
+    recommended_reads: list = field(default_factory=list)
 
 
 DIMENSIONS = ["reasoning", "multimodal", "code", "long_context", "speed_cost"]
@@ -69,6 +70,15 @@ def build_analysis_prompt(articles: list[dict]) -> str:
       "source": "来源名称",
       "url": "原文链接"
     }}
+  ],
+  "recommended_reads": [
+    {{
+      "tag": "技术实践|行业洞察|工具推荐|深度分析|教程",
+      "title": "文章标题",
+      "summary": "1-2句中文摘要，说明为什么值得读",
+      "source": "来源名称",
+      "url": "原文链接"
+    }}
   ]
 }}
 
@@ -78,7 +88,10 @@ def build_analysis_prompt(articles: list[dict]) -> str:
 - 厂商名统一为: OpenAI, Anthropic, Google, Meta, xAI, 阿里, 字节, MiniMax, Kimi, 百度
 - 如果出现其他厂商/初创公司，也一并输出
 - 评分基于公开信息和行业共识
-- special_news 仅包含重大事件
+- special_news 仅包含重大事件（厂商发布、融资、安全漏洞、财报等）
+- recommended_reads 包含有价值的技术分享、实践教程、行业深度分析、工具推荐等非新闻类但值得阅读的文章
+- 每篇文章只能出现在 special_news 或 recommended_reads 其中一个，不要重复
+- recommended_reads 至少包含所有技术教程、实践分享、深度分析类文章
 
 ## 本期新闻
 
@@ -87,18 +100,35 @@ def build_analysis_prompt(articles: list[dict]) -> str:
 
 
 def parse_analysis_response(raw_text: str) -> AnalysisResult:
-    """Parse Claude's response text into an AnalysisResult."""
+    """Parse LLM response text into an AnalysisResult."""
+    if not raw_text:
+        print("⚠️  LLM returned empty response")
+        return AnalysisResult()
+
     cleaned = raw_text.strip()
+
+    # Try extracting JSON from markdown code block
     match = re.search(r"```(?:json)?\s*\n?(.*?)\n?```", cleaned, re.DOTALL)
     if match:
         cleaned = match.group(1).strip()
 
-    data = json.loads(cleaned)
+    # Try finding JSON object directly
+    if not cleaned.startswith("{"):
+        json_match = re.search(r"\{[\s\S]*\}", cleaned)
+        if json_match:
+            cleaned = json_match.group(0)
+
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        print(f"⚠️  Failed to parse LLM response as JSON. Raw text:\n{raw_text[:500]}")
+        return AnalysisResult()
 
     return AnalysisResult(
         scores=data.get("scores", {}),
         openness=data.get("openness", {}),
         special_news=data.get("special_news", []),
+        recommended_reads=data.get("recommended_reads", []),
     )
 
 
@@ -110,19 +140,35 @@ def merge_scores(previous: dict, new: dict) -> dict:
     return merged
 
 
-def analyze_articles(articles: list[dict]) -> AnalysisResult:
-    """Call Claude API to analyze articles. Requires ANTHROPIC_API_KEY env var."""
+def analyze_articles(articles: list[dict], max_retries: int = 2) -> AnalysisResult:
+    """Call LLM API to analyze articles. Uses MiniMax via OpenAI-compatible API."""
     if not articles:
         return AnalysisResult()
 
-    client = anthropic.Anthropic()
+    client = OpenAI(
+        api_key=os.environ.get("MINIMAX_API_KEY"),
+        base_url="https://api.minimax.chat/v1",
+    )
     prompt = build_analysis_prompt(articles)
 
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=4096,
-        messages=[{"role": "user", "content": prompt}],
-    )
+    for attempt in range(max_retries + 1):
+        try:
+            response = client.chat.completions.create(
+                model="MiniMax-M2.5",
+                max_tokens=4096,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            raw_text = response.choices[0].message.content
+            result = parse_analysis_response(raw_text)
+            if result.scores:  # got valid data
+                return result
+            if attempt < max_retries:
+                print(f"⚠️  Empty scores, retrying ({attempt + 1}/{max_retries})...")
+        except Exception as e:
+            if attempt < max_retries:
+                print(f"⚠️  LLM call failed: {e}, retrying ({attempt + 1}/{max_retries})...")
+            else:
+                print(f"❌ LLM call failed after {max_retries + 1} attempts: {e}")
+                return AnalysisResult()
 
-    raw_text = message.content[0].text
-    return parse_analysis_response(raw_text)
+    return result if result else AnalysisResult()
