@@ -1,0 +1,104 @@
+# config.yaml — 用户可随时编辑此文件来增删关注的 RSS 源
+sources:
+  # 微信公众号 (via WeWeRSS → RSS)
+  wechat_rss:
+    - url: "https://wewerss.example.com/feed/quantumbit"
+      name: "量子位"
+    - url: "https://wewerss.example.com/feed/jiqizhixin"
+      name: "机器之心"
+    - url: "https://wewerss.example.com/feed/36kr-ai"
+      name: "36氪AI"
+    - url: "https://wewerss.example.com/feed/geekpark"
+      name: "极客公园"
+    - url: "https://wewerss.example.com/feed/digitlife-kazik"
+      name: "数字生命卡兹克"
+    - url: "https://wewerss.example.com/feed/appso"
+      name: "APPSO"
+    - url: "https://wewerss.example.com/feed/xinzhiyuan"
+      name: "新智元"
+    - url: "https://wewerss.example.com/feed/jiaziguangnian"
+      name: "甲子光年"
+    - url: "https://wewerss.example.com/feed/zang-ai"
+      name: "葬AI"
+    - url: "https://wewerss.example.com/feed/founder-park"
+      name: "Founder Park"
+    - url: "https://wewerss.example.com/feed/github-explore"
+      name: "逛逛GitHub"
+    - url: "https://wewerss.example.com/feed/sv-tech-review"
+      name: "硅谷科技评论"
+
+  # X / Twitter (via RSSHub)
+  x_rss:
+    - url: "https://rsshub.example.com/twitter/user/sama"
+      name: "@sama"
+    - url: "https://rsshub.example.com/twitter/user/karpathy"
+      name: "@karpathy"
+    - url: "https://rsshub.example.com/twitter/user/demaborasade"
+      name: "@demishassabis"
+    - url: "https://rsshub.example.com/twitter/user/ylecun"
+      name: "@ylecun"
+    - url: "https://rsshub.example.com/twitter/user/laborasadems"
+      name: "@lmsysorg"
+
+  # 厂商官方博客 (原生 RSS)
+  official_blogs:
+    - url: "https://openai.com/blog/rss.xml"
+      name: "OpenAI Blog"
+      vendor: "OpenAI"
+    - url: "https://www.anthropic.com/news/rss"
+      name: "Anthropic News"
+      vendor: "Anthropic"
+    - url: "https://blog.google/technology/ai/rss/"
+      name: "Google AI Blog"
+      vendor: "Google"
+    - url: "https://ai.meta.com/blog/rss/"
+      name: "Meta AI Blog"
+      vendor: "Meta"
+
+vendors:
+  international:
+    - "OpenAI"
+    - "Anthropic"
+    - "Google"
+    - "Meta"
+    - "xAI"
+  china:
+    - "阿里"
+    - "字节"
+    - "MiniMax"
+    - "Kimi"
+    - "百度"
+
+dimensions:
+  - key: "reasoning"
+    label: "🧠 推理"
+    color: "#7ee787"
+    border: "#7ee787"
+  - key: "multimodal"
+    label: "👁️ 多模态"
+    color: "#79c0ff"
+    border: "#79c0ff"
+  - key: "code"
+    label: "💻 代码"
+    color: "#f78166"
+    border: "#f78166"
+  - key: "long_context"
+    label: "📄 长上下文"
+    color: "#d2a8ff"
+    border: "#d2a8ff"
+  - key: "speed_cost"
+    label: "⚡ 速度/成本"
+    color: "#ffa657"
+    border: "#ffa657"
+
+email:
+  smtp_host: "smtp.gmail.com"
+  smtp_port: 587
+  from_addr: "your@gmail.com"
+  to_addrs:
+    - "your@gmail.com"
+
+schedule:
+  times: ["10:00", "22:00"]
+  timezone: "Asia/Shanghai"
+  window_hours: 12
