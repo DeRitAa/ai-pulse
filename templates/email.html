@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 动态周报</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0d1117;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      color: #c9d1d9;
+    }
+    .wrapper {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 32px 24px;
+      background: #161b22;
+      border-radius: 12px;
+      border: 1px solid #30363d;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #e6edf3;
+    }
+    .header .meta {
+      font-size: 13px;
+      color: #8b949e;
+    }
+    .header .meta span {
+      margin: 0 6px;
+    }
+    /* Section title */
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 12px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #21262d;
+    }
+    /* Grid layout for modules */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    /* Individual module card */
+    .module {
+      background: #161b22;
+      border-radius: 10px;
+      border: 1px solid #30363d;
+      padding: 14px;
+    }
+    .module-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0 0 12px 0;
+      color: #e6edf3;
+      padding-bottom: 8px;
+      border-bottom-width: 2px;
+      border-bottom-style: solid;
+    }
+    /* Vendor row in dimension modules */
+    .vendor-row {
+      margin-bottom: 10px;
+    }
+    .vendor-row:last-child {
+      margin-bottom: 0;
+    }
+    .vendor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 4px;
+    }
+    .vendor-name {
+      font-size: 12px;
+      color: #c9d1d9;
+      font-weight: 500;
+    }
+    .vendor-model {
+      font-size: 10px;
+      color: #8b949e;
+    }
+    .vendor-score {
+      font-size: 12px;
+      font-weight: 700;
+      color: #e6edf3;
+    }
+    /* Progress bar */
+    .bar-bg {
+      background: #21262d;
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+    /* Openness tags */
+    .openness-vendor {
+      margin-bottom: 10px;
+    }
+    .openness-vendor:last-child {
+      margin-bottom: 0;
+    }
+    .openness-vendor-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #e6edf3;
+      margin-bottom: 6px;
+    }
+    .openness-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .openness-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #21262d;
+      color: #c9d1d9;
+      white-space: nowrap;
+    }
+    /* Special news section */
+    .news-section {
+      margin-bottom: 24px;
+    }
+    .news-card {
+      background: #161b22;
+      border-radius: 10px;
+      border-left-width: 3px;
+      border-left-style: solid;
+      border-top: 1px solid #30363d;
+      border-right: 1px solid #30363d;
+      border-bottom: 1px solid #30363d;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .news-card:last-child {
+      margin-bottom: 0;
+    }
+    .news-type-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+    }
+    .news-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #e6edf3;
+      margin: 0 0 6px 0;
+    }
+    .news-summary {
+      font-size: 13px;
+      color: #8b949e;
+      line-height: 1.5;
+      margin: 0 0 8px 0;
+    }
+    .news-source-link {
+      font-size: 12px;
+      color: #58a6ff;
+      text-decoration: none;
+    }
+    .news-source-link:hover {
+      text-decoration: underline;
+    }
+    /* Footer */
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      color: #484f58;
+      padding-top: 16px;
+      border-top: 1px solid #21262d;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <!-- Header -->
+    <div class="header">
+      <h1>🤖 AI 动态周报</h1>
+      <div class="meta">
+        <span>{{ report_time }}</span>
+        &middot;
+        <span>{{ total_articles }} 条动态</span>
+      </div>
+    </div>
+
+    <!-- Capability Dimension Modules Grid -->
+    {% if dimensions %}
+    <p class="section-title">能力评分</p>
+    <div class="grid">
+      {% for dim in dimensions %}
+      <div class="module">
+        <div class="module-title" style="border-bottom-color: {{ dim.border }}; color: {{ dim.color }};">
+          {{ dim.label }}
+        </div>
+        {% set vendors = scores_by_dim[dim.key] %}
+        {% if vendors %}
+          {% for vendor_name, model_name, score in vendors %}
+          <div class="vendor-row">
+            <div class="vendor-header">
+              <div>
+                <span class="vendor-name">{{ vendor_name }}</span>
+                {% if model_name %}
+                <br /><span class="vendor-model">{{ model_name }}</span>
+                {% endif %}
+              </div>
+              <span class="vendor-score">{{ score }}</span>
+            </div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: {{ score }}%; background-color: {{ dim.color }};"></div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div style="font-size: 12px; color: #484f58;">暂无数据</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <!-- Openness Module -->
+      <div class="module">
+        <div class="module-title" style="border-bottom-color: #58a6ff; color: #58a6ff;">
+          🔓 开放程度
+        </div>
+        {% if openness %}
+          {% for vendor_name, attrs in openness.items() %}
+          <div class="openness-vendor">
+            <div class="openness-vendor-name">{{ vendor_name }}</div>
+            <div class="openness-tags">
+              {% set os_map = {"open": "🟢 完全开源", "partial": "🟡 部分开源", "closed": "🔴 不开源"} %}
+              {% set api_map = {"open": "🟢 全量开放", "limited": "🟡 限速/邀请制", "closed": "🔴 未开放"} %}
+              {% set pricing_map = {"transparent": "🟢 透明公开", "contact": "🟡 需联系销售", "unknown": "🔴 未知"} %}
+              <span class="openness-tag">{{ os_map.get(attrs.open_source, attrs.open_source) }}</span>
+              <span class="openness-tag">{{ api_map.get(attrs.api, attrs.api) }}</span>
+              <span class="openness-tag">{{ pricing_map.get(attrs.pricing, attrs.pricing) }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div style="font-size: 12px; color: #484f58;">暂无数据</div>
+        {% endif %}
+      </div>
+
+    </div>
+    {% endif %}
+
+    <!-- Special News Section -->
+    {% if special_news %}
+    <div class="news-section">
+      <p class="section-title">重要动态</p>
+      {% for news in special_news %}
+        {% set ntype = news_types.get(news.type, {"emoji": "📰", "label": news.type, "color": "#8b949e"}) %}
+        <div class="news-card" style="border-left-color: {{ ntype.color }};">
+          <div>
+            <span class="news-type-tag" style="background-color: {{ ntype.color }}20; color: {{ ntype.color }};">
+              {{ ntype.emoji }} {{ ntype.label }}
+            </span>
+          </div>
+          <div class="news-title">{{ news.title }}</div>
+          <p class="news-summary">{{ news.summary }}</p>
+          <a class="news-source-link" href="{{ news.url }}" target="_blank">
+            📎 {{ news.source }} &rarr; {{ news.url }}
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="footer">
+      由 Claude 自动生成 &middot; {{ report_time }}
+    </div>
+
+  </div>
+</body>
+</html>
